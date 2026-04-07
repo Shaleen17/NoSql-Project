@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getApiErrorMessage } from "../services/api.js";
 
 const Register = () => {
   const { register } = useAuth();
@@ -25,7 +26,7 @@ const Register = () => {
       await register(form);
       navigate("/chat");
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Registration failed");
+      setError(getApiErrorMessage(requestError, "Registration failed"));
     } finally {
       setLoading(false);
     }

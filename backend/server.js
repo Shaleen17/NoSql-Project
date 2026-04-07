@@ -20,15 +20,20 @@ const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEWS === "true";
+const vercelPreviewOriginPattern = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i;
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const isAllowedVercelPreview =
+      allowVercelPreviews && vercelPreviewOriginPattern.test(origin || "");
+
+    if (!origin || allowedOrigins.includes(origin) || isAllowedVercelPreview) {
       callback(null, true);
       return;
     }
 
-    callback(new Error(`CORS blocked origin: ${origin}`));
+    callback(new Error(`CORS blocked origin: ${origin}. Add it to CLIENT_URL.`));
   },
   credentials: true
 };

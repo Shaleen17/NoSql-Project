@@ -15,4 +15,16 @@ export const setAuthToken = (token) => {
   delete api.defaults.headers.common.Authorization;
 };
 
+export const getApiErrorMessage = (error, fallback = "Request failed") => {
+  if (error.response?.data?.message) {
+    return error.response.data.message;
+  }
+
+  if (error.code === "ERR_NETWORK" || error.message === "Network Error") {
+    return `Cannot reach backend API at ${API_URL}. Check VITE_API_URL on Vercel and CLIENT_URL on Render.`;
+  }
+
+  return fallback;
+};
+
 export default api;

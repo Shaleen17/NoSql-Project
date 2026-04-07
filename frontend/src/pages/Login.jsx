@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getApiErrorMessage } from "../services/api.js";
 
 const Login = () => {
   const { login } = useAuth();
@@ -25,7 +26,7 @@ const Login = () => {
       await login(form);
       navigate("/chat");
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Login failed");
+      setError(getApiErrorMessage(requestError, "Login failed"));
     } finally {
       setLoading(false);
     }
