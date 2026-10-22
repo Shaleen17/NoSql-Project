@@ -413,3 +413,209 @@ a {
     gap: 12px;
   }
 }
+
+/* ============================================================
+   ENCRYPTION / CIPHER UI
+   ============================================================ */
+
+/* Warning banners */
+.warning-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 0.88rem;
+  margin: 8px 16px;
+  padding: 10px 14px;
+}
+
+.no-key-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.88rem;
+  margin: 8px 16px;
+  padding: 10px 14px;
+}
+
+/* Cipher select in message input */
+.cipher-select {
+  background: #ffffff;
+  border: 1px solid #d1d7db;
+  border-radius: 8px;
+  color: #111b21;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cipher-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Message input grid: cipher select + input + button */
+.message-input {
+  background: #f0f2f5;
+  border-top: 1px solid #d1d7db;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  grid-template-columns: unset;
+  padding: 16px;
+}
+
+.message-input input {
+  flex: 1;
+}
+
+/* Lock badge in message meta */
+.lock-badge {
+  background: #e6f4ea;
+  border-radius: 4px;
+  color: #1a7340;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 1px 5px;
+}
+
+/* Decryption failure text */
+.decrypt-failed {
+  color: #b91c1c;
+  font-style: italic;
+}
+
+/* Server-view block shown below each encrypted message */
+.server-view {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-top: 8px;
+  padding: 8px 10px;
+}
+
+.server-view-label {
+  color: #667781;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.server-view-ciphertext {
+  color: #3d3d3d;
+  display: block;
+  font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+  font-size: 0.72rem;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+/* ============================================================
+   KEY EXCHANGE PANEL
+   ============================================================ */
+
+.kex-panel-wrapper {
+  position: relative;
+}
+
+.kex-toggle-btn {
+  background: transparent;
+  border: 1px solid #d1d7db;
+  border-radius: 8px;
+  color: #008069;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.kex-toggle-btn:hover {
+  background: #e8f5e9;
+}
+
+.kex-panel {
+  background: #ffffff;
+  border: 1px solid #d1d7db;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(17, 27, 33, 0.12);
+  padding: 18px 20px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 340px;
+  z-index: 100;
+}
+
+.kex-title {
+  color: #008069;
+  font-size: 0.95rem;
+  margin: 0 0 14px;
+}
+
+.kex-row {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.kex-label {
+  color: #667781;
+  font-size: 0.82rem;
+  font-weight: 700;
+  min-width: 120px;
+}
+
+.kex-value {
+  color: #111b21;
+  font-size: 0.82rem;
+}
+
+.mono {
+  font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+  word-break: break-all;
+}
+
+.kex-fingerprint-row {
+  border-bottom: 1px solid #e9edef;
+  border-top: 1px solid #e9edef;
+  padding: 10px 0;
+}
+
+.kex-fingerprint {
+  color: #008069;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.kex-hint {
+  color: #667781;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 10px 0 12px;
+}
+
+.kex-toggle-label {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.85rem;
+  gap: 6px;
+}
+
+.copy-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-left: 4px;
+  padding: 2px 4px;
+}

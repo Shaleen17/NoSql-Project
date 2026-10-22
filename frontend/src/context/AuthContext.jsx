@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import api, { setAuthToken } from "../services/api.js";
+import { ensureKeyPair } from "../crypto/keyStore.js";
+import { clearMasterKeyCache } from "../crypto/keyStore.js";
 
 const AuthContext = createContext(null);
 
@@ -14,6 +16,8 @@ const readStoredUser = () => {
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem("chat_token"));
   const [user, setUser] = useState(readStoredUser);
+  const [encryptionReady, setEncryptionReady] = useState(false);
+  const [keyChangedWarning, setKeyChangedWarning] = useState(false);
 
   const saveSession = useCallback((session) => {
     localStorage.setItem("chat_token", session.token);
@@ -26,9 +30,12 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     localStorage.removeItem("chat_token");
     localStorage.removeItem("chat_user");
+    clearMasterKeyCache();
     setToken(null);
     setUser(null);
     setAuthToken(null);
+    setEncryptionReady(false);
+    setKeyChangedWarning(false);
   }, []);
 
   const login = useCallback(
@@ -58,7 +65,21 @@ export const AuthProvider = ({ children }) => {
     const { data } = await api.get("/users/me");
     localStorage.setItem("chat_user", JSON.stringify(data));
     setUser(data);
+    return data;
   }, [token]);
+
+  // Initialize encryption key pair once the user session is known
+  const initEncryption = useCallback(async (currentUser) => {
+    if (!currentUser?._id) return;
+    try {
+      const { keyChanged } = await ensureKeyPair(currentUser._id, currentUser.publicKey || "");
+      setKeyChangedWarning(keyChanged);
+      setEncryptionReady(true);
+    } catch (_err) {
+      // Non-fatal: the app still works, encryption just won't be available
+      setEncryptionReady(false);
+    }
+  }, []);
 
   useEffect(() => {
     setAuthToken(token);
@@ -66,9 +87,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      refreshMe().catch(logout);
+      refreshMe()
+        .then((freshUser) => {
+          if (freshUser) initEncryption(freshUser);
+        })
+        .catch(logout);
     }
-  }, [logout, refreshMe, token]);
+  }, [logout, refreshMe, token, initEncryption]);
 
   const value = useMemo(
     () => ({
@@ -77,9 +102,11 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
-      refreshMe
+      refreshMe,
+      encryptionReady,
+      keyChangedWarning
     }),
-    [login, logout, refreshMe, register, token, user]
+    [login, logout, refreshMe, register, token, user, encryptionReady, keyChangedWarning]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -108,7 +108,10 @@ const setupSocket = (io) => {
           senderId: userId,
           text: payload.text,
           fileUrl: payload.fileUrl,
-          messageType: payload.messageType
+          messageType: payload.messageType,
+          cipher: payload.cipher,
+          nonce: payload.nonce,
+          isEncrypted: payload.isEncrypted
         });
 
         const chatRoom = `chat:${normalizeId(chat._id)}`;

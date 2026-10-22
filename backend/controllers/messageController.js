@@ -48,7 +48,10 @@ exports.sendMessage = async (req, res, next) => {
       senderId: req.user._id,
       text: req.body.text,
       fileUrl: req.body.fileUrl,
-      messageType: req.body.messageType
+      messageType: req.body.messageType,
+      cipher: req.body.cipher,
+      nonce: req.body.nonce,
+      isEncrypted: req.body.isEncrypted
     });
 
     const io = req.app.get("io");

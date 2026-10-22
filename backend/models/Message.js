@@ -25,7 +25,6 @@ const messageSchema = new mongoose.Schema(
     },
     text: {
       type: String,
-      trim: true,
       default: ""
     },
     fileUrl: {
@@ -40,6 +39,19 @@ const messageSchema = new mongoose.Schema(
     seenAt: {
       type: Date,
       default: null
+    },
+    cipher: {
+      type: String,
+      enum: ["none", "caesar", "vernam"],
+      default: "none"
+    },
+    nonce: {
+      type: String,
+      default: null
+    },
+    isEncrypted: {
+      type: Boolean,
+      default: false
     }
   },
   { timestamps: true }

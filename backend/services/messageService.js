@@ -1,7 +1,7 @@
 const Chat = require("../models/Chat");
 const Message = require("../models/Message");
 
-const userFields = "name email profilePic isOnline lastSeen";
+const userFields = "name email profilePic isOnline lastSeen publicKey";
 
 const normalizeId = (value) => value.toString();
 
@@ -30,10 +30,55 @@ const populateMessage = (query) =>
     .populate("sender", userFields)
     .populate("receiver", userFields);
 
-const createMessageRecord = async ({ chatId, senderId, text, fileUrl = null, messageType = "text" }) => {
-  const trimmedText = typeof text === "string" ? text.trim() : "";
+const createMessageRecord = async ({
+  chatId,
+  senderId,
+  text,
+  fileUrl = null,
+  messageType = "text",
+  cipher = "none",
+  nonce = null,
+  isEncrypted = false
+}) => {
+  // Validate encryption-related fields
+  const allowedCiphers = ["none", "caesar", "vernam"];
+  if (!allowedCiphers.includes(cipher)) {
+    const error = new Error("Invalid cipher value");
+    error.statusCode = 400;
+    throw error;
+  }
 
-  if (messageType === "text" && !trimmedText) {
+  if (isEncrypted && cipher === "none") {
+    const error = new Error("isEncrypted requires cipher to be 'caesar' or 'vernam'");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (cipher === "vernam") {
+    if (!nonce || !/^[0-9a-f]{24}$/.test(nonce)) {
+      const error = new Error("Vernam cipher requires a valid 24-char hex nonce");
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  // For plaintext messages, trim and check for empty
+  // For encrypted messages, do NOT trim (Caesar ciphertext can start/end with a space)
+  let storeText;
+  if (isEncrypted) {
+    storeText = typeof text === "string" ? text : "";
+  } else {
+    storeText = typeof text === "string" ? text.trim() : "";
+  }
+
+  // Enforce max text length
+  if (storeText.length > 10000) {
+    const error = new Error("Message text exceeds maximum allowed length");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (messageType === "text" && !storeText) {
     const error = new Error("Message text cannot be empty");
     error.statusCode = 400;
     throw error;
@@ -60,9 +105,12 @@ const createMessageRecord = async ({ chatId, senderId, text, fileUrl = null, mes
     sender: senderId,
     receiver: receiverId,
     messageType,
-    text: trimmedText,
+    text: storeText,
     fileUrl,
-    status: "sent"
+    status: "sent",
+    cipher,
+    nonce,
+    isEncrypted
   });
 
   const recipientIds = getRecipientIds(chat, senderId);
@@ -71,10 +119,15 @@ const createMessageRecord = async ({ chatId, senderId, text, fileUrl = null, mes
     return updates;
   }, {});
 
+  // Never store plaintext or ciphertext in lastMessageText for encrypted messages
+  const lastMessageText = isEncrypted
+    ? "🔒 Encrypted message"
+    : storeText || (messageType === "image" ? "Image" : "File");
+
   const update = {
     $set: {
       lastMessage: message._id,
-      lastMessageText: trimmedText || (messageType === "image" ? "Image" : "File"),
+      lastMessageText,
       lastMessageTime: message.createdAt,
       updatedAt: message.createdAt
     }
